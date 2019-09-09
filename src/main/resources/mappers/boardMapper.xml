@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.sinc.board">
+	<select	id="boardlist"
+			resultType="board">
+		SELECT	SEQ, TITLE, WRITER, TO_CHAR(REGDATE, 'RRRR/MM/DD') AS REGDATE, VIEWCNT
+		FROM	SPRING_BOARD_TBL
+		ORDER BY 1 DESC
+	</select>
+	
+	<insert	id="insertBoard"
+			parameterType="board">	<!-- 예전 버전에서는 resultType="int" 쓰기도 했음 -->
+		INSERT INTO SPRING_BOARD_TBL(SEQ, TITLE, CONTENT, WRITER, REGDATE, VIEWCNT)
+		VALUES(BOARD_SEQ.NEXTVAL, #{title}, #{content}, #{writer}, DEFAULT, DEFAULT)
+	</insert>
+	
+	<select	id="searchAjax"
+			parameterType="java.util.HashMap"	
+			resultType = "board">	<!-- parameterType에 java.util.Map, map 모두 해볼 것 -->
+		SELECT	SEQ, TITLE, WRITER, TO_CHAR(REGDATE, 'RRRR/MM/DD') AS REGDATE, VIEWCNT
+		FROM	SPRING_BOARD_TBL
+		<where>
+			<if test="type == 'title'">
+				<!-- xml 파일에서는 연결 연산자를 이용해야 한다. -->
+				TITLE LIKE '%'||#{ keyword }||'%'</if>
+			<if test="type == 'writer'">
+				WRITER LIKE '%'||#{ keyword }||'%'</if>
+		</where>
+		ORDER BY 1 DESC
+	</select>
+	
+	<select	id="detailselect"
+			parameterType="board"
+			resultType="board" >
+		SELECT * FROM SPRING_BOARD_TBL
+		WHERE	SEQ = #{seq}
+	</select>
+	
+	<delete id="boarddelete"
+			parameterType="board">
+		DELETE	FROM	SPRING_BOARD_TBL
+		WHERE	SEQ = #{ seq }
+	</delete>
+	
+	<update id="boardupdate"
+			parameterType="board">
+		UPDATE SPRING_BOARD_TBL
+  		SET TITLE=#{title}, CONTENT=#{content}
+  		WHERE SEQ=#{seq}
+	</update>
+	
+	<insert	id="replyinsert"
+			parameterType="reply">
+		INSERT INTO SPRING_REPLY_TBL(RSEQ, RWRITER, RCONTENT, RREGDATE, BSEQ)
+		VALUES(REPLY_SEQ.NEXTVAL, #{rwriter}, #{rcontent}, DEFAULT, #{bseq})
+	</insert>
+	
+	<select id="replyselect_r"
+			parameterType="reply"
+			resultType="reply">
+		SELECT RSEQ, RWRITER, RCONTENT, TO_CHAR(RREGDATE, 'RRRR/MM/DD') AS RREGDATE, BSEQ FROM SPRING_REPLY_TBL
+		WHERE	BSEQ = #{bseq}		
+		ORDER BY	RSEQ DESC
+	</select>
+	
+	<select id="replyselect_b"
+			parameterType="board"
+			resultType="reply">
+		SELECT RSEQ, RWRITER, RCONTENT, TO_CHAR(RREGDATE, 'RRRR/MM/DD') AS RREGDATE, BSEQ FROM SPRING_REPLY_TBL
+		WHERE	BSEQ = #{seq}
+		ORDER BY	RSEQ DESC		
+	</select>
+	
+	<delete id="replydelete"
+			parameterType="reply">
+		DELETE FROM SPRING_REPLY_TBL
+		WHERE	RSEQ = #{rseq}
+	</delete>
+	<!-- SALARY <![CDATA[ > ]]> 1000 -->
+	<!-- > 기호를 &dt, &lt로 바꾸지 않고 character로 parsing하는 코드 -->
+</mapper>  
+
+
+
+
+
+
+
+
+
+
+

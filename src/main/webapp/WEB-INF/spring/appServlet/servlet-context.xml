@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+		
+	</beans:bean>
+	
+	<context:component-scan base-package="com.sinc.project.**" />
+	
+	<beans:bean id="sampleInter" 
+				class="com.sinc.project.interceptor.TestInterceptor" />
+	<beans:bean id="authInter" 
+				class="com.sinc.project.board.util.AuthorInterceptor" />
+	<beans:bean id="loginInter"
+				class="com.sinc.project.user.util.LoginInterceptor" />
+	<interceptors>
+		<interceptor>
+			<!-- 현재는 pre.sinc를 구현하지 않아서 실습은 /user/login.sinc로 해보기 -->
+			<!-- pre.sinc 요청이 들어왔을 때 sampleInter가 발동된다. -->
+			<mapping path="pre.sinc" />
+			<beans:ref bean="sampleInter" />
+		</interceptor>
+		
+		<interceptor>
+			<mapping path="/board/register.sinc" />
+			<!-- 같은 기능인 interceptor의 경우 mapping의 path를 추가하면 됨 -->
+			<beans:ref bean="authInter" />
+		</interceptor>
+		
+		<interceptor>
+			<mapping path="/user/login.sinc" />
+			<beans:ref bean="loginInter" />
+		</interceptor>
+		
+	</interceptors>
+</beans:beans>

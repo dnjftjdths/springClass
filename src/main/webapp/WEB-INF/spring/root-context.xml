@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+ 
+	<!--   <bean id="testS" class="com.sinc.project.test.service.TestServiceImpl"> -->
+		<!-- <property name="dao" ref="dao" />  -->
+		<!-- 매개변수 1개(=constructor-arg 개수) 생성자 -->
+	<!--  	<constructor-arg ref ="dao"/>
+	</bean>
+
+	<bean id="dao" class="com.sinc.project.test.model.dao.DaoImpl" />
+	-->
+	
+	<!-- 1. DataSource 설정추가하고 JUnit 연결 테스트하기 -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property>
+		<property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:xe"></property>
+		<property name="username" value="hr"></property>
+		<property name="password" value="hr"></property>
+	</bean>
+	
+	<!-- 2. MyBatis 연동을 위한 추가 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        	<property name="dataSource" ref="dataSource" />
+        	<!-- 3. resource에 mybatis-config.xml 만들고 추가하기 -->
+        	<property name="configLocation" value="classpath:mybatis-config.xml" />
+			<!-- 4. resource에 mappers 디렉토리를 만들고 추가하기 mybatis dqm -->
+        	<property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml" />
+    </bean>
+    
+    <!-- 6. @repository 에서 의존성 주입을 위한 설정 -->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+	
+	<!-- component-scan : annotation을 scan하는 역할 -->
+    <context:component-scan base-package="com.sinc.project.**" />
+    
+    <!-- aspect 태그를 찾아서 인식하게 한다. -->
+    <aop:aspectj-autoproxy />
+    
+    <!--  
+    <bean id="loginAspect" 	class="com.sinc.project.aop.common.LoginAspect" />
+    <bean id="serviceTarget" class="com.sinc.project.aop.core.SincServiceImpl" />
+    -->
+    <!-- aop -->
+    <!--  
+    <aop:config>
+    	<aop:pointcut id="publicMethod" expression="execution(public * com.sinc.project..*Impl.say*(..))" />
+    	<aop:aspect id="beforeAspect" ref="loginAspect">
+    		<aop:before pointcut-ref="publicMethod" method="before"/>
+    	</aop:aspect>
+    </aop:config>
+    -->
+    
+</beans>
